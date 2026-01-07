@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const Home = () => {
-    const { user, logOut } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     return (

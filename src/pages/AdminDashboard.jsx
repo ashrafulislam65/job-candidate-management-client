@@ -9,7 +9,9 @@ import useAuth from "../hooks/useAuth";
 const AdminDashboard = () => {
     const { role } = useAuth();
     const [activeTab, setActiveTab] = useState("candidates");
-    const isAdmin = role === 'admin';
+    const isAdmin = role?.toLowerCase() === 'admin';
+
+    console.log('AdminDashboard Role:', role, 'isAdmin:', isAdmin);
 
     return (
         <div className="space-y-6">

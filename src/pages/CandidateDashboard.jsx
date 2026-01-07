@@ -44,10 +44,14 @@ const CandidateDashboard = () => {
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="card lg:card-side bg-base-100 shadow-2xl overflow-hidden border border-base-300">
                 <div className="bg-primary text-primary-content p-8 flex flex-col items-center justify-center min-w-[200px] text-center">
-                    <div className="avatar placeholder mb-4">
-                        <div className="bg-neutral text-neutral-content rounded-full w-24 ring ring-primary ring-offset-base-100 ring-offset-2">
-                            <span className="text-3xl font-black uppercase">{candidate.name?.charAt(0)}</span>
-                        </div>
+                    <div className="avatar ring ring-primary ring-offset-base-100 ring-offset-2 rounded-full overflow-hidden w-24 h-24 mb-4 shadow-xl">
+                        {candidate.photo ? (
+                            <img src={candidate.photo.startsWith('http') ? candidate.photo : `${import.meta.env.VITE_API_URL}${candidate.photo}`} alt="Profile" className="object-cover w-full h-full" />
+                        ) : (
+                            <div className="bg-neutral text-neutral-content flex items-center justify-center w-full h-full">
+                                <span className="text-3xl font-black uppercase">{candidate.name?.charAt(0)}</span>
+                            </div>
+                        )}
                     </div>
                     <h2 className="text-xl font-black uppercase text-secondary italic tracking-tighter">{candidate.name}</h2>
                     <div className="badge badge-secondary font-bold mt-2 uppercase text-[10px] tracking-widest">{candidate.status}</div>
@@ -75,10 +79,28 @@ const CandidateDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="mt-8 p-6 bg-secondary/10 border-2 border-dashed border-secondary/30 rounded-3xl relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-16 h-16 bg-secondary rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700"></div>
-                        <h4 className="font-black uppercase tracking-tighter italic text-secondary mb-1">Application Status Note</h4>
-                        <p className="text-sm font-bold opacity-80 leading-relaxed italic text-secondary">"Your profile reflects {candidate.experience_years} years of professional background. We are currently reviewing your {candidate.previous_experience ? 'previous roles' : 'history'} against our current openings."</p>
+                    <div className="mt-8 p-8 bg-gradient-to-br from-primary to-primary-focus text-primary-content rounded-3xl shadow-xl border border-white/10 relative overflow-hidden group">
+                        {/* Decorative Background Elements */}
+                        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
+                        <div className="absolute -left-10 -top-10 w-32 h-32 bg-secondary/20 rounded-full blur-2xl"></div>
+
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-2 bg-white/20 rounded-lg backdrop-blur-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3h9m-9 3h9m-12-3h.008v.008H3v-.008z" />
+                                    </svg>
+                                </div>
+                                <h4 className="font-black uppercase tracking-widest text-[10px]">Status Update</h4>
+                            </div>
+                            <p className="text-lg font-medium leading-relaxed italic pr-4">
+                                "Your profile reflects <span className="underline decoration-secondary decoration-2 underline-offset-4 font-black">{candidate.experience_years} years</span> of professional background. We are currently reviewing your {candidate.previous_experience ? 'previous roles' : 'history'} against our current openings."
+                            </p>
+                            <div className="mt-4 flex items-center gap-2 opacity-60">
+                                <span className="w-8 h-[2px] bg-white/30"></span>
+                                <span className="text-[9px] font-black uppercase tracking-widest">Recruitment Team</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

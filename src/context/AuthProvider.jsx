@@ -37,17 +37,26 @@ const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch user role
-  const { data: role, isLoading: isRoleLoading } = useQuery({
-    queryKey: ["role", user?.email],
+  // Fetch user profile from DB
+  const { data: dbUser, isLoading: isRoleLoading } = useQuery({
+    queryKey: ["dbUser", user?.email],
     enabled: !!user,
     queryFn: async () => {
       const res = await axiosSecure.get("/api/users/me");
-      return res.data.role; // Assuming backend returns { role: "..." }
+      return res.data; // { role: "...", name: "...", photo: "..." }
     },
   });
 
-  const authInfo = { user, loading, register, login, logout, role, isRoleLoading };
+  const authInfo = {
+    user,
+    loading,
+    register,
+    login,
+    logout,
+    dbUser,
+    role: dbUser?.role,
+    isRoleLoading
+  };
 
   return (
     <AuthContext.Provider value={authInfo}>

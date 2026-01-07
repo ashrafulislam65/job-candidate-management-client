@@ -20,8 +20,9 @@ const Register = () => {
         email: result.user.email,
         name: data.name,
         phone: data.phone, // Added phone
-        experience_years: data.experience_years, // Added experience
-        previous_experience: data.previous_experience, // Added previous_experience
+        experience_years: data.experience_years,
+        previous_experience: data.previous_experience,
+        age: data.age, // Added age
         role: 'candidate'
       });
 
@@ -83,9 +84,9 @@ const Register = () => {
               {errors.phone && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.phone.message}</p>}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="form-control">
-                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Years of Experience</span></label>
+                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Experience (Yrs)</span></label>
                 <input
                   type="number"
                   placeholder="2"
@@ -93,6 +94,17 @@ const Register = () => {
                   {...register("experience_years", { required: "Required" })}
                 />
                 {errors.experience_years && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.experience_years.message}</p>}
+              </div>
+
+              <div className="form-control">
+                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Age</span></label>
+                <input
+                  type="number"
+                  placeholder="25"
+                  className={`input input-bordered w-full font-bold ${errors.age ? 'input-error' : ''}`}
+                  {...register("age", { required: "Required" })}
+                />
+                {errors.age && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.age.message}</p>}
               </div>
 
               <div className="form-control">

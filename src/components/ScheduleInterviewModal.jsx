@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosSecure from "../api/axiosSecure";
+import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
 
 const ScheduleInterviewModal = ({ onClose, preSelectedCandidates = [] }) => {
     const queryClient = useQueryClient();
-    const [selectedCandidates, setSelectedCandidates] = useState(
-        preSelectedCandidates
-    );
-    const [formData, setFormData] = useState({
-        date: "",
-        time: "",
-        type: "Technical",
+    const [selectedCandidates, setSelectedCandidates] = useState(preSelectedCandidates);
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        defaultValues: {
+            date: "",
+            time: "",
+            type: "Technical",
+        }
     });
 
-    // Fetch candidates for selection
-    const { data: candidates } = useQuery({
+    // Fetch candidates for selection (only those not already interviewed or needing re-interview)
+    const { data: candidates, isLoading: isCandidatesLoading } = useQuery({
         queryKey: ["candidates"],
         queryFn: async () => {
             const res = await axiosSecure.get("/api/candidates");
@@ -27,9 +29,11 @@ const ScheduleInterviewModal = ({ onClose, preSelectedCandidates = [] }) => {
             await axiosSecure.post("/api/interviews", interviewData);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries(["interviews"]);
-            onClose();
+            // Success is handled after all mutations finish in onSubmit
         },
+        onError: (err) => {
+            Swal.fire("Error", err.message || "Failed to schedule", "error");
+        }
     });
 
     const handleToggleCandidate = (candidateId) => {
@@ -40,115 +44,155 @@ const ScheduleInterviewModal = ({ onClose, preSelectedCandidates = [] }) => {
         );
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const onSubmit = async (data) => {
         if (selectedCandidates.length === 0) {
-            alert("Please select at least one candidate");
+            Swal.fire("Notice", "Please select at least one candidate", "warning");
             return;
         }
 
-        // Schedule interview for each selected candidate
-        selectedCandidates.forEach((candidateId) => {
-            scheduleMutation.mutate({
-                candidateId,
-                date: formData.date,
-                time: formData.time,
-                type: formData.type,
-            });
+        Swal.fire({
+            title: 'Scheduling...',
+            html: 'Please wait while we schedule the interviews.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
         });
+
+        try {
+            // Schedule interview for each selected candidate
+            const promises = selectedCandidates.map((candidateId) =>
+                axiosSecure.post("/api/interviews", {
+                    candidateId,
+                    date: data.date,
+                    time: data.time,
+                    type: data.type,
+                })
+            );
+
+            await Promise.all(promises);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: `${selectedCandidates.length} interviews scheduled successfully.`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            queryClient.invalidateQueries(["interviews"]);
+            queryClient.invalidateQueries(["candidates"]);
+            onClose();
+        } catch (err) {
+            Swal.fire("Error", "Some schedules failed to save.", "error");
+        }
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <h3 className="text-xl font-bold mb-4">Schedule Interview</h3>
-
-                <form onSubmit={handleSubmit}>
-                    {/* Interview Details */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-1">Date</label>
-                        <input
-                            type="date"
-                            value={formData.date}
-                            onChange={(e) =>
-                                setFormData({ ...formData, date: e.target.value })
-                            }
-                            className="w-full border px-3 py-2 rounded"
-                            required
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-1">Time</label>
-                        <input
-                            type="time"
-                            value={formData.time}
-                            onChange={(e) =>
-                                setFormData({ ...formData, time: e.target.value })
-                            }
-                            className="w-full border px-3 py-2 rounded"
-                            required
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-1">Type</label>
-                        <select
-                            value={formData.type}
-                            onChange={(e) =>
-                                setFormData({ ...formData, type: e.target.value })
-                            }
-                            className="w-full border px-3 py-2 rounded"
-                        >
-                            <option value="Technical">Technical</option>
-                            <option value="HR">HR</option>
-                            <option value="Managerial">Managerial</option>
-                            <option value="General">General</option>
-                        </select>
-                    </div>
-
-                    {/* Candidate Selection */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2">
-                            Select Candidates ({selectedCandidates.length} selected)
-                        </label>
-                        <div className="border rounded max-h-60 overflow-y-auto">
-                            {candidates?.map((candidate) => (
-                                <label
-                                    key={candidate._id}
-                                    className="flex items-center p-2 hover:bg-gray-50 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedCandidates.includes(candidate._id)}
-                                        onChange={() => handleToggleCandidate(candidate._id)}
-                                        className="mr-2"
-                                    />
-                                    <span>
-                                        {candidate.name} ({candidate.email})
-                                    </span>
-                                </label>
-                            ))}
+        <div className="fixed inset-0 bg-base-300/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+            <div className="card w-full max-w-2xl bg-base-100 shadow-2xl border border-base-300 animate-in zoom-in-95 duration-300">
+                <div className="card-body">
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 className="text-2xl font-black uppercase tracking-tighter italic">Schedule <span className="text-primary">Interview</span></h3>
+                            <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">Plan your technical and HR evaluations</p>
                         </div>
+                        <button onClick={onClose} className="btn btn-ghost btn-sm btn-circle font-bold">✕</button>
                     </div>
 
-                    <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            disabled={scheduleMutation.isPending}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
-                        >
-                            {scheduleMutation.isPending ? "Scheduling..." : "Schedule"}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </form>
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-base-200 p-4 rounded-2xl border border-base-300">
+                            <div className="form-control">
+                                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Date</span></label>
+                                <input
+                                    type="date"
+                                    className={`input input-bordered input-sm font-bold ${errors.date ? 'input-error' : ''}`}
+                                    {...register("date", { required: "Required" })}
+                                />
+                            </div>
+
+                            <div className="form-control">
+                                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Time</span></label>
+                                <input
+                                    type="time"
+                                    className={`input input-bordered input-sm font-bold ${errors.time ? 'input-error' : ''}`}
+                                    {...register("time", { required: "Required" })}
+                                />
+                            </div>
+
+                            <div className="form-control">
+                                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Interview Type</span></label>
+                                <select
+                                    className="select select-bordered select-sm font-bold"
+                                    {...register("type")}
+                                >
+                                    <option value="Technical">Technical</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Managerial">Managerial</option>
+                                    <option value="General">General</option>
+                                    <option value="Second Interview">Second Interview</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Candidate Selection */}
+                        <div className="space-y-3">
+                            <label className="label py-0 px-2 flex justify-between items-end">
+                                <span className="label-text font-black uppercase text-[10px] opacity-70 italic underline decoration-primary decoration-2 underline-offset-4">Select Candidates</span>
+                                <span className="badge badge-primary badge-sm font-black italic">{selectedCandidates.length} Selected</span>
+                            </label>
+
+                            <div className="border border-base-300 rounded-2xl max-h-60 overflow-y-auto bg-base-50 p-1">
+                                {isCandidatesLoading ? (
+                                    <div className="flex justify-center p-10"><span className="loading loading-spinner text-primary"></span></div>
+                                ) : candidates?.length === 0 ? (
+                                    <p className="text-center p-10 text-xs italic opacity-40">No available candidates found</p>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                        {candidates?.map((candidate) => (
+                                            <div
+                                                key={candidate._id}
+                                                onClick={() => handleToggleCandidate(candidate._id)}
+                                                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${selectedCandidates.includes(candidate._id)
+                                                    ? "bg-primary/10 border-primary shadow-sm"
+                                                    : "hover:bg-base-200 border-transparent"
+                                                    }`}
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedCandidates.includes(candidate._id)}
+                                                    onChange={(e) => { e.stopPropagation(); handleToggleCandidate(candidate._id); }}
+                                                    className="checkbox checkbox-primary checkbox-sm shadow-none"
+                                                />
+                                                <div className="min-w-0">
+                                                    <div className="font-black text-xs truncate">{candidate.name}</div>
+                                                    <div className="text-[9px] opacity-60 font-bold truncate uppercase">{candidate.status}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="card-actions justify-end mt-8 gap-3">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="btn btn-ghost btn-sm font-black uppercase tracking-widest text-[11px]"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={scheduleMutation.isPending}
+                                className="btn btn-primary btn-sm px-10 font-black uppercase italic tracking-tighter shadow-lg"
+                            >
+                                Confirm Schedule
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

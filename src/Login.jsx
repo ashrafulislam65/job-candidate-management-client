@@ -1,16 +1,23 @@
+import { useNavigate } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
 
 const Login = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
 
-    login(email, password)
-      .then(res => console.log(res.user))
-      .catch(err => console.error(err));
+    try {
+      const result = await login(email, password);
+      const token = await result.user.getIdToken();
+      console.log("User Token:", token);
+      navigate("/app");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (

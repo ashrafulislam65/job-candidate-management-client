@@ -2,9 +2,15 @@
 
 # Job Candidate Management System
 
-# JobPortal - Intelligent Recruitment Solution
 
-A premium, MERN-stack based platform for managing recruitment workflows with precision and style.
+<div align="center">
+  <img src="/home-page.png" alt="JobPortal Home Page" width="800" />
+  <br />
+  <h1 align="center">JobPortal - Intelligent Recruitment Solution</h1>
+  <p align="center">
+    A premium, MERN-stack based platform for managing recruitment workflows with precision and style.
+  </p>
+</div>
 
 ## 🚀 Overview
 

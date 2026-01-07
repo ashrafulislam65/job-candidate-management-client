@@ -4,7 +4,7 @@
 
 
 <div align="center">
-  <img src="/home-page.png" alt="JobPortal Home Page" width="800" />
+  <img src="public/home-page.png" alt="JobPortal Home Page" width="800" />
   <br />
   <h1 align="center">JobPortal - Intelligent Recruitment Solution</h1>
   <p align="center">

@@ -7,40 +7,47 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState("candidates");
 
     return (
-        <div>
-            <h2 className="text-2xl font-bold mb-4">Admin Dashboard</h2>
+        <div className="space-y-6">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h2 className="text-4xl font-black uppercase tracking-tighter">Admin <span className="text-primary">Panel</span></h2>
 
-            {/* Tabs */}
-            <div className="flex gap-4 mb-4 border-b">
-                <button
-                    onClick={() => setActiveTab("candidates")}
-                    className={`px-4 py-2 ${activeTab === "candidates"
-                            ? "border-b-2 border-blue-500 font-bold"
-                            : "text-gray-600"
-                        }`}
-                >
-                    Candidates
-                </button>
-                <button
-                    onClick={() => setActiveTab("interviews")}
-                    className={`px-4 py-2 ${activeTab === "interviews"
-                            ? "border-b-2 border-blue-500 font-bold"
-                            : "text-gray-600"
-                        }`}
-                >
-                    Interviews
-                </button>
+                {/* daisyUI Tabs */}
+                <div role="tablist" className="tabs tabs-boxed bg-base-100 p-1 shadow-inner border border-base-300">
+                    <button
+                        role="tab"
+                        onClick={() => setActiveTab("candidates")}
+                        className={`tab font-bold transition-all ${activeTab === "candidates" ? "tab-active !bg-primary !text-primary-content" : ""}`}
+                    >
+                        Candidates
+                    </button>
+                    <button
+                        role="tab"
+                        onClick={() => setActiveTab("interviews")}
+                        className={`tab font-bold transition-all ${activeTab === "interviews" ? "tab-active !bg-primary !text-primary-content" : ""}`}
+                    >
+                        Interviews
+                    </button>
+                </div>
+            </header>
+
+            {/* Content Area */}
+            <div className="bg-base-100 rounded-3xl p-6 lg:p-8 shadow-xl border border-base-300 min-h-[60vh]">
+                {activeTab === "candidates" ? (
+                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <section>
+                            <CandidateUpload />
+                        </section>
+                        <div className="divider opacity-20"></div>
+                        <section>
+                            <CandidateList />
+                        </section>
+                    </div>
+                ) : (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <InterviewManagement />
+                    </div>
+                )}
             </div>
-
-            {/* Content */}
-            {activeTab === "candidates" ? (
-                <>
-                    <CandidateUpload />
-                    <CandidateList />
-                </>
-            ) : (
-                <InterviewManagement />
-            )}
         </div>
     );
 };

@@ -4,13 +4,19 @@ import CandidateUpload from "../components/CandidateUpload";
 import InterviewManagement from "./InterviewManagement";
 import UserManagement from "./UserManagement";
 
+import useAuth from "../hooks/useAuth";
+
 const AdminDashboard = () => {
+    const { role } = useAuth();
     const [activeTab, setActiveTab] = useState("candidates");
+    const isAdmin = role === 'admin';
 
     return (
         <div className="space-y-6">
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h2 className="text-4xl font-black uppercase tracking-tighter">Admin <span className="text-primary">Panel</span></h2>
+                <h2 className="text-4xl font-black uppercase tracking-tighter">
+                    {isAdmin ? "Admin" : "Staff"} <span className="text-primary">Panel</span>
+                </h2>
 
                 {/* daisyUI Tabs */}
                 <div role="tablist" className="tabs tabs-boxed bg-base-100 p-1 shadow-inner border border-base-300">
@@ -28,13 +34,15 @@ const AdminDashboard = () => {
                     >
                         Interviews
                     </button>
-                    <button
-                        role="tab"
-                        onClick={() => setActiveTab("users")}
-                        className={`tab font-bold transition-all ${activeTab === "users" ? "tab-active !bg-primary !text-primary-content" : ""}`}
-                    >
-                        User Management
-                    </button>
+                    {isAdmin && (
+                        <button
+                            role="tab"
+                            onClick={() => setActiveTab("users")}
+                            className={`tab font-bold transition-all ${activeTab === "users" ? "tab-active !bg-primary !text-primary-content" : ""}`}
+                        >
+                            User Management
+                        </button>
+                    )}
                 </div>
             </header>
 

@@ -4,7 +4,11 @@ import axiosSecure from "../api/axiosSecure";
 import ScheduleInterviewModal from "../components/ScheduleInterviewModal";
 import Swal from "sweetalert2";
 
+import useAuth from "../hooks/useAuth";
+
 const InterviewManagement = () => {
+    const { role } = useAuth();
+    const isAdmin = role === 'admin';
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState("upcoming");
     const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -98,36 +102,38 @@ const InterviewManagement = () => {
                     <h2 className="text-3xl font-black uppercase tracking-tighter italic">Interview <span className="text-primary">Management</span></h2>
                     <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest mt-1">Track and schedule candidate evaluations</p>
                 </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => {
-                            // Context-aware phone download from Interview page
-                            const url = "/api/candidates/download-phones?upcomingOnly=true";
-                            axiosSecure.get(url, { responseType: "blob" }).then(res => {
-                                const blob = new Blob([res.data], { type: "text/plain" });
-                                const downloadUrl = window.URL.createObjectURL(blob);
-                                const link = document.createElement("a");
-                                link.href = downloadUrl;
-                                link.download = "upcoming-interview-phones.txt";
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                            });
-                        }}
-                        className="btn btn-outline btn-sm font-black italic"
-                    >
-                        Download Upcoming Phones
-                    </button>
-                    <button
-                        onClick={() => setShowScheduleModal(true)}
-                        className="btn btn-primary btn-sm font-black italic shadow-lg hover:scale-105"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        New Schedule
-                    </button>
-                </div>
+                {isAdmin && (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                // Context-aware phone download from Interview page
+                                const url = "/api/candidates/download-phones?upcomingOnly=true";
+                                axiosSecure.get(url, { responseType: "blob" }).then(res => {
+                                    const blob = new Blob([res.data], { type: "text/plain" });
+                                    const downloadUrl = window.URL.createObjectURL(blob);
+                                    const link = document.createElement("a");
+                                    link.href = downloadUrl;
+                                    link.download = "upcoming-interview-phones.txt";
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                });
+                            }}
+                            className="btn btn-outline btn-sm font-black italic"
+                        >
+                            Download Upcoming Phones
+                        </button>
+                        <button
+                            onClick={() => setShowScheduleModal(true)}
+                            className="btn btn-primary btn-sm font-black italic shadow-lg hover:scale-105"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            New Schedule
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Tabs */}
@@ -217,32 +223,36 @@ const InterviewManagement = () => {
                                             )}
                                         </td>
                                         <td className="text-right">
-                                            {activeTab === 'upcoming' ? (
-                                                <button
-                                                    onClick={() => toggleInterviewStatus.mutate({ id: interview._id, status: 'Completed' })}
-                                                    className="btn btn-ghost btn-xs font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-content"
-                                                >
-                                                    Mark Done
-                                                </button>
-                                            ) : (
-                                                interview.status === 'Completed' ? (
-                                                    <div className="flex justify-end gap-2">
-                                                        <button
-                                                            onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Passed', interview.type)}
-                                                            className="btn btn-success btn-xs font-black uppercase tracking-tighter shadow-sm"
-                                                        >
-                                                            Pass
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Rejected', interview.type)}
-                                                            className="btn btn-error btn-xs font-black uppercase tracking-tighter shadow-sm"
-                                                        >
-                                                            Reject
-                                                        </button>
-                                                    </div>
+                                            {isAdmin ? (
+                                                activeTab === 'upcoming' ? (
+                                                    <button
+                                                        onClick={() => toggleInterviewStatus.mutate({ id: interview._id, status: 'Completed' })}
+                                                        className="btn btn-ghost btn-xs font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-content"
+                                                    >
+                                                        Mark Done
+                                                    </button>
                                                 ) : (
-                                                    <span className="text-[10px] font-black italic opacity-30 uppercase tracking-widest">Finalized</span>
+                                                    interview.status === 'Completed' ? (
+                                                        <div className="flex justify-end gap-2">
+                                                            <button
+                                                                onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Passed', interview.type)}
+                                                                className="btn btn-success btn-xs font-black uppercase tracking-tighter shadow-sm"
+                                                            >
+                                                                Pass
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Rejected', interview.type)}
+                                                                className="btn btn-error btn-xs font-black uppercase tracking-tighter shadow-sm"
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] font-black italic opacity-30 uppercase tracking-widest">Finalized</span>
+                                                    )
                                                 )
+                                            ) : (
+                                                <span className="text-[10px] font-black italic opacity-30 uppercase tracking-widest">View Only</span>
                                             )}
                                         </td>
                                     </tr>

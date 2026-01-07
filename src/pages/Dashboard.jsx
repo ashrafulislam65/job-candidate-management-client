@@ -11,11 +11,13 @@ const Dashboard = () => {
         </div>
     );
 
+    const userRole = role?.toLowerCase();
+
     return (
         <div className="space-y-6">
-            {role === 'admin' || role === 'staff' ? (
+            {userRole === 'admin' || userRole === 'staff' ? (
                 <AdminDashboard />
-            ) : role === 'candidate' ? (
+            ) : userRole === 'candidate' ? (
                 <CandidateDashboard />
             ) : (
                 <div className="alert alert-warning shadow-lg rounded-3xl">

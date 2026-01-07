@@ -11,6 +11,7 @@ const CandidateList = () => {
     const { role } = useAuth();
     const [editingCandidate, setEditingCandidate] = useState(null);
     const [filter, setFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Selection state
     const [selectedIds, setSelectedIds] = useState([]);
@@ -141,10 +142,17 @@ const CandidateList = () => {
     );
 
     const filteredCandidates = candidates?.filter(c => {
-        if (filter === "all") return true;
-        if (filter === "hired") return c.status === "Hired";
-        if (filter === "rejected") return c.status === "Rejected";
-        return true;
+        const matchesSearch =
+            c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.phone?.includes(searchTerm);
+
+        let matchesStatus = true;
+        if (filter === "hired") matchesStatus = c.status === "Hired";
+        else if (filter === "rejected") matchesStatus = c.status === "Rejected";
+        else if (filter !== "all") matchesStatus = c.status === filter;
+
+        return matchesSearch && matchesStatus;
     });
 
     const isStaff = role === 'staff';
@@ -169,7 +177,20 @@ const CandidateList = () => {
 
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-4 bg-base-100 p-4 rounded-2xl border border-base-300 shadow-sm">
-                <div className="tabs tabs-boxed bg-base-200 w-fit">
+                <div className="form-control relative flex-grow max-w-md">
+                    <input
+                        type="text"
+                        placeholder="SEARCH CANDIDATES..."
+                        className="input input-bordered w-full pl-10 font-bold bg-base-200/50 rounded-xl"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 opacity-40">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </div>
+
+                <div className="tabs tabs-boxed bg-base-200">
                     <button
                         onClick={() => { setFilter("all"); setSelectedIds([]); }}
                         className={`tab font-bold transition-all ${filter === "all" ? "tab-active !bg-primary !text-primary-content" : ""}`}

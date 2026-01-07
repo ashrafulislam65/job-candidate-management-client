@@ -8,7 +8,7 @@ import useAuth from "../hooks/useAuth";
 
 const InterviewManagement = () => {
     const { role } = useAuth();
-    const isAdmin = role === 'admin';
+    const isAdmin = role?.toLowerCase() === 'admin';
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState("upcoming");
     const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -105,7 +105,8 @@ const InterviewManagement = () => {
                 {isAdmin && (
                     <div className="flex gap-2">
                         <button
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 // Context-aware phone download from Interview page
                                 const url = "/api/candidates/download-phones?upcomingOnly=true";
                                 axiosSecure.get(url, { responseType: "blob" }).then(res => {
@@ -124,7 +125,10 @@ const InterviewManagement = () => {
                             Download Upcoming Phones
                         </button>
                         <button
-                            onClick={() => setShowScheduleModal(true)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowScheduleModal(true);
+                            }}
                             className="btn btn-primary btn-sm font-black italic shadow-lg hover:scale-105"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
@@ -235,13 +239,13 @@ const InterviewManagement = () => {
                                                     interview.status === 'Completed' ? (
                                                         <div className="flex justify-end gap-2">
                                                             <button
-                                                                onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Passed', interview.type)}
+                                                                onClick={(e) => { e.stopPropagation(); handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Passed', interview.type); }}
                                                                 className="btn btn-success btn-xs font-black uppercase tracking-tighter shadow-sm"
                                                             >
                                                                 Pass
                                                             </button>
                                                             <button
-                                                                onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Rejected', interview.type)}
+                                                                onClick={(e) => { e.stopPropagation(); handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Rejected', interview.type); }}
                                                                 className="btn btn-error btn-xs font-black uppercase tracking-tighter shadow-sm"
                                                             >
                                                                 Reject

@@ -14,6 +14,7 @@ const ScheduleInterviewModal = ({ onClose, preSelectedCandidates = [] }) => {
             type: "Technical",
         }
     });
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Fetch candidates for selection (only those not already interviewed or needing re-interview)
     const { data: candidates, isLoading: isCandidatesLoading } = useQuery({
@@ -142,6 +143,19 @@ const ScheduleInterviewModal = ({ onClose, preSelectedCandidates = [] }) => {
                                 <span className="badge badge-primary badge-sm font-black italic">{selectedCandidates.length} Selected</span>
                             </label>
 
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Filter by name or email..."
+                                    className="input input-bordered input-xs w-full mb-2 pl-8 font-bold"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5 absolute left-2.5 top-[7px] opacity-40">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                </svg>
+                            </div>
+
                             <div className="border border-base-300 rounded-2xl max-h-60 overflow-y-auto bg-base-50 p-1">
                                 {isCandidatesLoading ? (
                                     <div className="flex justify-center p-10"><span className="loading loading-spinner text-primary"></span></div>
@@ -149,7 +163,10 @@ const ScheduleInterviewModal = ({ onClose, preSelectedCandidates = [] }) => {
                                     <p className="text-center p-10 text-xs italic opacity-40">No available candidates found</p>
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                                        {candidates?.map((candidate) => (
+                                        {candidates?.filter(c =>
+                                            c.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                            c.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                                        ).map((candidate) => (
                                             <div
                                                 key={candidate._id}
                                                 onClick={() => handleToggleCandidate(candidate._id)}

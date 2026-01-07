@@ -2,6 +2,7 @@ import { useState } from "react";
 import CandidateList from "./CandidateList";
 import CandidateUpload from "../components/CandidateUpload";
 import InterviewManagement from "./InterviewManagement";
+import UserManagement from "./UserManagement";
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState("candidates");
@@ -27,6 +28,13 @@ const AdminDashboard = () => {
                     >
                         Interviews
                     </button>
+                    <button
+                        role="tab"
+                        onClick={() => setActiveTab("users")}
+                        className={`tab font-bold transition-all ${activeTab === "users" ? "tab-active !bg-primary !text-primary-content" : ""}`}
+                    >
+                        User Management
+                    </button>
                 </div>
             </header>
 
@@ -42,9 +50,13 @@ const AdminDashboard = () => {
                             <CandidateList />
                         </section>
                     </div>
-                ) : (
+                ) : activeTab === "interviews" ? (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <InterviewManagement />
+                    </div>
+                ) : (
+                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <UserManagement />
                     </div>
                 )}
             </div>

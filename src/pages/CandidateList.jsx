@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import useAuth from "../hooks/useAuth";
+import ScheduleInterviewModal from "../components/ScheduleInterviewModal";
 
 const CandidateList = () => {
     const queryClient = useQueryClient();
@@ -250,6 +251,16 @@ const CandidateList = () => {
                         ) : (
                             filteredCandidates?.map((candidate) => (
                                 <tr key={candidate._id} className="hover:bg-primary/5 transition-colors">
+                                    {!isStaff && (
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                className="checkbox checkbox-primary checkbox-sm shadow-sm"
+                                                checked={selectedIds.includes(candidate._id)}
+                                                onChange={() => handleToggleSelect(candidate._id)}
+                                            />
+                                        </td>
+                                    )}
                                     <td>
                                         <div className="flex items-center gap-3">
                                             <div className="avatar">
@@ -358,6 +369,17 @@ const CandidateList = () => {
                     onClose={() => {
                         setShowBulkModal(false);
                         setSelectedIds([]);
+                    }}
+                />
+            )}
+            {/* Refactored Edit Modal */}
+            {editingCandidate && (
+                <EditModal
+                    candidate={editingCandidate}
+                    onClose={() => setEditingCandidate(null)}
+                    onSuccess={() => {
+                        setEditingCandidate(null);
+                        queryClient.invalidateQueries(["candidates"]);
                     }}
                 />
             )}

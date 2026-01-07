@@ -42,7 +42,7 @@ const AuthProvider = ({ children }) => {
     queryKey: ["role", user?.email],
     enabled: !!user,
     queryFn: async () => {
-      const res = await axiosSecure.get("/me");
+      const res = await axiosSecure.get("/api/users/me");
       return res.data.role; // Assuming backend returns { role: "..." }
     },
   });

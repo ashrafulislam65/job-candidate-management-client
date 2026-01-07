@@ -176,8 +176,8 @@ const CandidateList = () => {
             </div>
 
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-4 bg-base-100 p-4 rounded-2xl border border-base-300 shadow-sm">
-                <div className="form-control relative flex-grow max-w-md">
+            <div className="flex flex-col lg:flex-row items-center gap-4 bg-base-100 p-4 rounded-2xl border border-base-300 shadow-sm">
+                <div className="form-control relative w-full lg:max-w-md">
                     <input
                         type="text"
                         placeholder="SEARCH CANDIDATES..."
@@ -190,40 +190,40 @@ const CandidateList = () => {
                     </svg>
                 </div>
 
-                <div className="tabs tabs-boxed bg-base-200">
+                <div className="tabs tabs-boxed bg-base-200 w-full lg:w-auto overflow-x-auto flex-nowrap justify-center">
                     <button
                         onClick={() => { setFilter("all"); setSelectedIds([]); }}
-                        className={`tab font-bold transition-all ${filter === "all" ? "tab-active !bg-primary !text-primary-content" : ""}`}
+                        className={`tab font-bold transition-all whitespace-nowrap ${filter === "all" ? "tab-active !bg-primary !text-primary-content" : ""}`}
                     >
                         All
                     </button>
                     <button
                         onClick={() => { setFilter("hired"); setSelectedIds([]); }}
-                        className={`tab font-bold transition-all ${filter === "hired" ? "tab-active !bg-success !text-success-content" : ""}`}
+                        className={`tab font-bold transition-all whitespace-nowrap ${filter === "hired" ? "tab-active !bg-success !text-success-content" : ""}`}
                     >
                         Hired
                     </button>
                     <button
                         onClick={() => { setFilter("rejected"); setSelectedIds([]); }}
-                        className={`tab font-bold transition-all ${filter === "rejected" ? "tab-active !bg-error !text-error-content" : ""}`}
+                        className={`tab font-bold transition-all whitespace-nowrap ${filter === "rejected" ? "tab-active !bg-error !text-error-content" : ""}`}
                     >
                         Rejected
                     </button>
                     <button
                         onClick={() => { setFilter("Passed First Interview"); setSelectedIds([]); }}
-                        className={`tab font-bold transition-all ${filter === "Passed First Interview" ? "tab-active !bg-accent !text-accent-content" : ""}`}
+                        className={`tab font-bold transition-all whitespace-nowrap ${filter === "Passed First Interview" ? "tab-active !bg-accent !text-accent-content" : ""}`}
                     >
                         Passed 1st
                     </button>
                 </div>
 
                 {!isStaff && (
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div className="flex flex-wrap justify-center lg:justify-end items-center gap-2 w-full lg:w-auto lg:ml-auto">
                         <div className="join">
                             <input
                                 type="text"
                                 placeholder="Range (e.g. 2-10)"
-                                className="input input-bordered input-sm join-item w-32 font-bold"
+                                className="input input-bordered input-sm join-item w-28 font-bold"
                                 value={rangeInput}
                                 onChange={(e) => setRangeInput(e.target.value)}
                             />
@@ -234,7 +234,7 @@ const CandidateList = () => {
                             onClick={() => setShowBulkModal(true)}
                             className="btn btn-sm btn-primary font-black uppercase tracking-tighter"
                         >
-                            Bulk Schedule ({selectedIds.length})
+                            Bulk ({selectedIds.length})
                         </button>
                     </div>
                 )}

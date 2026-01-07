@@ -49,7 +49,7 @@ const AuthProvider = ({ children }) => {
 
   const authInfo = {
     user,
-    loading,
+    loading: loading || (!!user && isRoleLoading), // Wait for DB profile if user exists
     register,
     login,
     logout,

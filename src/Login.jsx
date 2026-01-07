@@ -12,7 +12,6 @@ const Login = () => {
     try {
       const result = await login(data.email, data.password);
       const token = await result.user.getIdToken();
-      console.log("User Token:", token);
 
       Swal.fire({
         icon: "success",
@@ -22,7 +21,7 @@ const Login = () => {
         showConfirmButton: false,
       });
 
-      navigate("/app");
+      navigate("/");
     } catch (err) {
       console.error(err);
       Swal.fire({

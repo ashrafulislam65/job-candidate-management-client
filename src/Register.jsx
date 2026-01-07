@@ -9,6 +9,8 @@ const Register = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
+  const { logout } = useAuth(); // Destructure logout from useAuth
+
   const onSubmit = async (data) => {
     try {
       // 1. Register in Firebase
@@ -19,22 +21,27 @@ const Register = () => {
         uid: result.user.uid,
         email: result.user.email,
         name: data.name,
-        phone: data.phone, // Added phone
+        phone: data.phone,
         experience_years: data.experience_years,
         previous_experience: data.previous_experience,
-        age: data.age, // Added age
+        age: data.age,
         role: 'candidate'
       });
+
+      // 3. Force Logout to prevent auto-login and ensure fresh session on next login
+      await logout();
 
       Swal.fire({
         icon: "success",
         title: "Registration Successful",
-        text: "Your account has been created.",
-        timer: 2000,
-        showConfirmButton: false,
+        text: "Please login with your new credentials.",
+        timer: 3000,
+        showConfirmButton: true,
+        confirmButtonText: "Go to Login"
       });
 
-      navigate("/app");
+      // 4. Redirect to Login
+      navigate("/login");
     } catch (err) {
       console.error("Registration Error:", err);
       Swal.fire({
@@ -57,7 +64,13 @@ const Register = () => {
                 type="text"
                 placeholder="John Doe"
                 className={`input input-bordered w-full font-bold ${errors.name ? 'input-error' : ''}`}
-                {...register("name", { required: "Full Name is required" })}
+                {...register("name", {
+                  required: "Full Name is required",
+                  pattern: {
+                    value: /^[a-zA-Z\s]+$/,
+                    message: "Name can only contain letters and spaces"
+                  }
+                })}
               />
               {errors.name && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.name.message}</p>}
             </div>
@@ -68,7 +81,13 @@ const Register = () => {
                 type="email"
                 placeholder="email@example.com"
                 className={`input input-bordered w-full font-bold ${errors.email ? 'input-error' : ''}`}
-                {...register("email", { required: "Email is required" })}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                })}
               />
               {errors.email && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.email.message}</p>}
             </div>
@@ -77,21 +96,33 @@ const Register = () => {
               <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Phone Number</span></label>
               <input
                 type="text"
-                placeholder="+8801..."
+                placeholder="01712345678"
                 className={`input input-bordered w-full font-bold ${errors.phone ? 'input-error' : ''}`}
-                {...register("phone", { required: "Phone number is required" })}
+                {...register("phone", {
+                  required: "Phone number is required",
+                  pattern: {
+                    value: /^(?:\+88|88)?(01[3-9]\d{8})$/,
+                    message: "Invalid Bangladesh phone number"
+                  }
+                })}
               />
               {errors.phone && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.phone.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="form-control">
-                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Experience (Yrs)</span></label>
+                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Exp (Yrs)</span></label>
                 <input
                   type="number"
                   placeholder="2"
                   className={`input input-bordered w-full font-bold ${errors.experience_years ? 'input-error' : ''}`}
-                  {...register("experience_years", { required: "Required" })}
+                  {...register("experience_years", {
+                    required: "Required",
+                    min: {
+                      value: 0,
+                      message: "Must be 0+"
+                    }
+                  })}
                 />
                 {errors.experience_years && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.experience_years.message}</p>}
               </div>
@@ -102,16 +133,22 @@ const Register = () => {
                   type="number"
                   placeholder="25"
                   className={`input input-bordered w-full font-bold ${errors.age ? 'input-error' : ''}`}
-                  {...register("age", { required: "Required" })}
+                  {...register("age", {
+                    required: "Required",
+                    min: {
+                      value: 18,
+                      message: "Must be 18+"
+                    }
+                  })}
                 />
                 {errors.age && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.age.message}</p>}
               </div>
 
               <div className="form-control">
-                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Previous Role</span></label>
+                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Prev Role</span></label>
                 <input
                   type="text"
-                  placeholder="Software Engineer"
+                  placeholder="Dev"
                   className={`input input-bordered w-full font-bold ${errors.previous_experience ? 'input-error' : ''}`}
                   {...register("previous_experience", { required: "Required" })}
                 />
@@ -121,18 +158,24 @@ const Register = () => {
 
             <div className="form-control">
               <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Password</span></label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className={`input input-bordered w-full font-bold ${errors.password ? 'input-error' : ''}`}
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 6,
-                    message: "At least 6 characters"
-                  }
-                })}
-              />
+              <div className="tooltip tooltip-bottom w-full" data-tip="Min 6 chars, 1 Uppercase, 1 Lowercase, 1 Number">
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  className={`input input-bordered w-full font-bold ${errors.password ? 'input-error' : ''}`}
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "At least 6 characters"
+                    },
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/,
+                      message: "Must have 1 Upper, 1 Lower, 1 Number"
+                    }
+                  })}
+                />
+              </div>
               {errors.password && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.password.message}</p>}
             </div>
 

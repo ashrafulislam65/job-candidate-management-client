@@ -3,6 +3,7 @@ import useAuth from "../hooks/useAuth";
 import Swal from "sweetalert2";
 import { useState } from "react";
 import ProfileUpdateModal from "../components/ProfileUpdateModal";
+import { FaTwitter, FaLinkedin, FaGithub, FaFacebook } from "react-icons/fa";
 
 const MainLayout = () => {
   const { user, logout, dbUser, role } = useAuth();
@@ -156,33 +157,75 @@ const MainLayout = () => {
       </main>
 
       {/* Premium Footer */}
-      <footer className="bg-base-100 border-t border-base-300">
-        <div className="max-w-7xl mx-auto px-4 py-12 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center rotate-12">
-                  <span className="text-primary-content font-black text-xl italic -rotate-12">J</span>
+      <footer className="bg-base-100 border-t border-base-300 pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            {/* Brand Column */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center rotate-12 shadow-lg shadow-primary/20">
+                  <span className="text-primary-content font-black text-2xl italic -rotate-12">J</span>
                 </div>
-                <span className="text-xl font-black uppercase tracking-widest italic">Job<span className="text-primary">Portal</span></span>
+                <span className="text-2xl font-black uppercase tracking-widest italic">Job<span className="text-primary">Portal</span></span>
               </div>
-              <p className="text-sm font-bold opacity-60 italic max-w-xs transition-all hover:opacity-100">
-                Advanced candidate management for high-growth tech teams.
+              <p className="text-sm font-bold opacity-60 leading-relaxed">
+                Streamlining recruitment for modern teams. We bridge the gap between talent and opportunity with precision and speed.
               </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-base-content/60 hover:bg-primary hover:text-primary-content transition-all hover:scale-110">
+                  <FaTwitter className="w-4 h-4" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-base-content/60 hover:bg-primary hover:text-primary-content transition-all hover:scale-110">
+                  <FaLinkedin className="w-4 h-4" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-base-content/60 hover:bg-primary hover:text-primary-content transition-all hover:scale-110">
+                  <FaGithub className="w-4 h-4" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center text-base-content/60 hover:bg-primary hover:text-primary-content transition-all hover:scale-110">
+                  <FaFacebook className="w-4 h-4" />
+                </a>
+              </div>
             </div>
 
-            <div className="flex gap-8 font-black uppercase text-[10px] tracking-widest italic opacity-50">
-              <a href="#" className="hover:text-primary transition-all hover:translate-y-[-2px]">Twitter</a>
-              <a href="#" className="hover:text-primary transition-all hover:translate-y-[-2px]">LinkedIn</a>
-              <a href="#" className="hover:text-primary transition-all hover:translate-y-[-2px]">GitHub</a>
+            {/* Company Links */}
+            <div>
+              <h4 className="font-black uppercase tracking-widest text-xs mb-6 opacity-40">Company</h4>
+              <ul className="space-y-4 text-sm font-bold opacity-70">
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">About Us</a></li>
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">Careers</a></li>
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">Blog</a></li>
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">Press Kit</a></li>
+              </ul>
+            </div>
+
+            {/* Resources Links */}
+            <div>
+              <h4 className="font-black uppercase tracking-widest text-xs mb-6 opacity-40">Resources</h4>
+              <ul className="space-y-4 text-sm font-bold opacity-70">
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">Documentation</a></li>
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">Help Center</a></li>
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">Community</a></li>
+                <li><a href="#" className="hover:text-primary hover:pl-2 transition-all">Contact Support</a></li>
+              </ul>
+            </div>
+
+            {/* Newsletter */}
+            <div>
+              <h4 className="font-black uppercase tracking-widest text-xs mb-6 opacity-40">Stay Updated</h4>
+              <p className="text-xs font-bold opacity-60 mb-4">Subscribe to our newsletter for the latest updates and features.</p>
+              <div className="join w-full">
+                <input className="input input-bordered input-sm join-item w-full font-bold focus:border-primary" placeholder="Email address" />
+                <button className="btn btn-primary btn-sm join-item font-black uppercase italic">Join</button>
+              </div>
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-base-300 flex flex-col md:flex-row justify-between items-center gap-4 opacity-40">
+          <div className="pt-8 border-t border-base-300 flex flex-col md:flex-row justify-between items-center gap-4 opacity-40">
             <p className="text-[10px] font-black uppercase tracking-widest">© 2026 JOBPORTAL SYSTEMS. ALL RIGHTS RESERVED.</p>
             <div className="flex gap-6 text-[10px] font-black uppercase tracking-widest">
-              <a href="#" className="hover:text-primary transition-colors">Privacy</a>
-              <a href="#" className="hover:text-primary transition-colors">Terms</a>
+              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-primary transition-colors">Cookie Policy</a>
             </div>
           </div>
         </div>

@@ -5,27 +5,35 @@ import Register from "./Register";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorPage from "./pages/ErrorPage";
+import DynamicTitle from "./components/DynamicTitle";
 
 function App() {
   return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <>
+      <DynamicTitle />
+      <Routes>
+        <Route element={<MainLayout />}>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes */}
-        <Route
-          path="/app"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Route>
-    </Routes>
+          {/* Protected Routes */}
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all 404 */}
+          <Route path="*" element={<ErrorPage />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

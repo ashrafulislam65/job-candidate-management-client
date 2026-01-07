@@ -31,12 +31,41 @@ const CandidateList = () => {
         }
     };
 
+    const handleDownloadPhones = async () => {
+        try {
+            const res = await axiosSecure.get("/api/candidates/download-phones", {
+                responseType: "blob",
+            });
+
+            const blob = new Blob([res.data], { type: "text/plain" });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "candidate-phones.txt";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download Error:", error);
+            alert("Failed to download phone numbers");
+        }
+    };
+
     if (isLoading) return <p>Loading candidates...</p>;
     if (error) return <p className="text-red-500">Error: {error.message}</p>;
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-4">Candidate List</h2>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Candidate List</h2>
+                <button
+                    onClick={handleDownloadPhones}
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                >
+                    Download Phones
+                </button>
+            </div>
 
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-white border border-gray-300">
@@ -68,8 +97,8 @@ const CandidateList = () => {
                                     <td className="px-4 py-2 border">{candidate.age}</td>
                                     <td className="px-4 py-2 border">
                                         <span className={`px-2 py-1 rounded text-sm ${candidate.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                candidate.status === 'Interview Scheduled' ? 'bg-blue-100 text-blue-800' :
-                                                    'bg-gray-100 text-gray-800'
+                                            candidate.status === 'Interview Scheduled' ? 'bg-blue-100 text-blue-800' :
+                                                'bg-gray-100 text-gray-800'
                                             }`}>
                                             {candidate.status}
                                         </span>

@@ -23,9 +23,9 @@ JobPortal streamlines the hiring process by connecting candidates with opportuni
 
 ## 🛠 Tech Stack
 
-*   **Frontend**: React, Vite, Tailwind CSS, DaisyUI, React Router, React Query, Recharts.
+*   **Frontend**: React, Vite, Tailwind CSS, DaisyUI, React Router, React Query.
 *   **Backend**: Node.js, Express.js (REST API).
-*   **Database**: MongoDB (Native Driver).
+*   **Database**: MongoDB Atlas (Native Driver).
 *   **Authentication**: Firebase Auth.
 *   **Deployment**: Firebase Hosting (Client) / Vercel (Server).
 

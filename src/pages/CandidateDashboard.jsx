@@ -5,8 +5,15 @@ const CandidateDashboard = () => {
     const { data: candidate, isLoading, error } = useQuery({
         queryKey: ["candidateProfile"],
         queryFn: async () => {
-            const res = await axiosSecure.get("/api/candidates/me");
-            return res.data;
+            try {
+                const res = await axiosSecure.get("/api/candidates/me");
+                return res.data;
+            } catch (err) {
+                if (err.response?.status === 404) {
+                    return null; // Handle missing profile gracefully
+                }
+                throw err;
+            }
         },
     });
 
@@ -59,19 +66,19 @@ const CandidateDashboard = () => {
                             <div className="stat-value text-base font-bold text-accent">{candidate.phone}</div>
                         </div>
                         <div className="stat bg-base-200 rounded-2xl p-4 shadow-sm">
-                            <div className="stat-title text-[10px] font-black uppercase tracking-widest">Experience</div>
+                            <div className="stat-title text-[10px] font-black uppercase tracking-widest">Total Experience</div>
                             <div className="stat-value text-base font-bold text-accent">{candidate.experience_years} Years</div>
                         </div>
                         <div className="stat bg-base-200 rounded-2xl p-4 shadow-sm">
-                            <div className="stat-title text-[10px] font-black uppercase tracking-widest">Age</div>
-                            <div className="stat-value text-base font-bold text-accent">{candidate.age} Years</div>
+                            <div className="stat-title text-[10px] font-black uppercase tracking-widest">Previous Roles</div>
+                            <div className="stat-value text-base font-bold text-accent italic">{candidate.previous_experience || "N/A"}</div>
                         </div>
                     </div>
 
                     <div className="mt-8 p-6 bg-secondary/10 border-2 border-dashed border-secondary/30 rounded-3xl relative overflow-hidden group">
                         <div className="absolute -right-4 -top-4 w-16 h-16 bg-secondary rounded-full opacity-10 group-hover:scale-150 transition-transform duration-700"></div>
-                        <h4 className="font-black uppercase tracking-tighter italic text-secondary mb-1">Recruiter Note</h4>
-                        <p className="text-sm font-bold opacity-80 leading-relaxed italic text-secondary">"Your application is currently being evaluated by our expert panel. We precisely value your background and will reach out shortly."</p>
+                        <h4 className="font-black uppercase tracking-tighter italic text-secondary mb-1">Application Status Note</h4>
+                        <p className="text-sm font-bold opacity-80 leading-relaxed italic text-secondary">"Your profile reflects {candidate.experience_years} years of professional background. We are currently reviewing your {candidate.previous_experience ? 'previous roles' : 'history'} against our current openings."</p>
                     </div>
                 </div>
             </div>

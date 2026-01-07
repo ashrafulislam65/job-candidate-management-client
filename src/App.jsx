@@ -3,6 +3,7 @@ import MainLayout from "./layouts/MainLayout";
 import Login from "./Login";
 import Register from "./Register";
 import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
     <Routes>
       <Route element={<MainLayout />}>
         {/* Public Routes */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -22,9 +24,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Redirect Root to App (Protected) */}
-        <Route path="/" element={<Navigate to="/app" replace />} />
       </Route>
     </Routes>
   );

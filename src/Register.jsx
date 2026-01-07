@@ -14,11 +14,15 @@ const Register = () => {
       // 1. Register in Firebase
       const result = await firebaseRegister(data.email, data.password);
 
-      // 2. Save to MongoDB
+      // 2. Save to MongoDB with Name and Role
       await axiosSecure.post('/api/users/register-role', {
         uid: result.user.uid,
         email: result.user.email,
-        role: 'candidate' // Default role
+        name: data.name,
+        phone: data.phone, // Added phone
+        experience_years: data.experience_years, // Added experience
+        previous_experience: data.previous_experience, // Added previous_experience
+        role: 'candidate'
       });
 
       Swal.fire({
@@ -41,45 +45,91 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-      <div className="card w-full max-w-sm shadow-2xl bg-base-100">
+    <div className="min-h-[80vh] flex items-center justify-center p-4">
+      <div className="card w-full max-w-md shadow-2xl bg-base-100 border border-base-300">
         <div className="card-body">
-          <h2 className="text-3xl font-bold text-center mb-6">Register</h2>
+          <h2 className="text-4xl font-black italic uppercase tracking-tighter text-center mb-8">Join the <span className="text-primary underline decoration-secondary decoration-4 underline-offset-4">Team</span></h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="form-control">
-              <label className="label text-sm font-semibold">Email</label>
+              <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Full Name</span></label>
               <input
-                type="email"
-                placeholder="email@example.com"
-                className={`input input-bordered w-full ${errors.email ? 'input-error' : ''}`}
-                {...register("email", { required: "Email is required" })}
+                type="text"
+                placeholder="John Doe"
+                className={`input input-bordered w-full font-bold ${errors.name ? 'input-error' : ''}`}
+                {...register("name", { required: "Full Name is required" })}
               />
-              {errors.email && <p className="text-error text-xs mt-1">{errors.email.message}</p>}
+              {errors.name && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.name.message}</p>}
             </div>
 
             <div className="form-control">
-              <label className="label text-sm font-semibold">Password</label>
+              <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Email Address</span></label>
+              <input
+                type="email"
+                placeholder="email@example.com"
+                className={`input input-bordered w-full font-bold ${errors.email ? 'input-error' : ''}`}
+                {...register("email", { required: "Email is required" })}
+              />
+              {errors.email && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.email.message}</p>}
+            </div>
+
+            <div className="form-control">
+              <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Phone Number</span></label>
+              <input
+                type="text"
+                placeholder="+8801..."
+                className={`input input-bordered w-full font-bold ${errors.phone ? 'input-error' : ''}`}
+                {...register("phone", { required: "Phone number is required" })}
+              />
+              {errors.phone && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.phone.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-control">
+                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Years of Experience</span></label>
+                <input
+                  type="number"
+                  placeholder="2"
+                  className={`input input-bordered w-full font-bold ${errors.experience_years ? 'input-error' : ''}`}
+                  {...register("experience_years", { required: "Required" })}
+                />
+                {errors.experience_years && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.experience_years.message}</p>}
+              </div>
+
+              <div className="form-control">
+                <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Previous Role</span></label>
+                <input
+                  type="text"
+                  placeholder="Software Engineer"
+                  className={`input input-bordered w-full font-bold ${errors.previous_experience ? 'input-error' : ''}`}
+                  {...register("previous_experience", { required: "Required" })}
+                />
+                {errors.previous_experience && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.previous_experience.message}</p>}
+              </div>
+            </div>
+
+            <div className="form-control">
+              <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Password</span></label>
               <input
                 type="password"
                 placeholder="••••••••"
-                className={`input input-bordered w-full ${errors.password ? 'input-error' : ''}`}
+                className={`input input-bordered w-full font-bold ${errors.password ? 'input-error' : ''}`}
                 {...register("password", {
                   required: "Password is required",
                   minLength: {
                     value: 6,
-                    message: "Password must be at least 6 characters"
+                    message: "At least 6 characters"
                   }
                 })}
               />
-              {errors.password && <p className="text-error text-xs mt-1">{errors.password.message}</p>}
+              {errors.password && <p className="text-error text-[10px] font-bold mt-1 uppercase italic tracking-tighter">{errors.password.message}</p>}
             </div>
 
-            <div className="form-control mt-6">
-              <button className="btn btn-primary w-full text-lg">Register</button>
+            <div className="form-control mt-8">
+              <button className="btn btn-primary w-full font-black uppercase italic shadow-lg">Create Account</button>
             </div>
           </form>
-          <p className="text-center mt-4 text-sm">
-            Already have an account? <Link to="/login" className="link link-primary font-bold">Login here</Link>
+          <p className="text-center mt-6 text-sm font-bold italic opacity-70">
+            Already have an account? <Link to="/login" className="text-primary hover:underline">Login here</Link>
           </p>
         </div>
       </div>

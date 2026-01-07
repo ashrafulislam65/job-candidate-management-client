@@ -20,19 +20,23 @@ const InterviewManagement = () => {
 
     // Update status mutation (for both interview and candidate)
     const updateResultMutation = useMutation({
-        mutationFn: async ({ interviewId, candidateId, result }) => {
+        mutationFn: async ({ interviewId, candidateId, result, interviewType }) => {
             // result can be 'Passed' or 'Rejected'
             await axiosSecure.put(`/api/interviews/${interviewId}/status`, { status: result });
 
-            // If result is passed, move candidate to 'Passed First Interview' or similar
-            const candidateStatus = result === 'Passed' ? 'Passed First Interview' : 'Rejected';
+            // Branching Logic for Final Status
+            let candidateStatus = 'Rejected';
+            if (result === 'Passed') {
+                candidateStatus = interviewType === 'Second Interview' ? 'Hired' : 'Passed First Interview';
+            }
+
             await axiosSecure.put(`/api/candidates/${candidateId}`, { status: candidateStatus });
         },
         onSuccess: () => {
             Swal.fire({
                 icon: 'success',
-                title: 'Result Recorded!',
-                text: 'Interview result and candidate status updated.',
+                title: 'Process Complete!',
+                text: 'Recruitment status has been successfully updated.',
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -44,19 +48,23 @@ const InterviewManagement = () => {
         }
     });
 
-    const handleMarkResult = (interviewId, candidateId, name, result) => {
+    const handleMarkResult = (interviewId, candidateId, name, result, interviewType) => {
+        const nextStatus = result === 'Passed'
+            ? (interviewType === 'Second Interview' ? 'Hired' : 'Passed First Interview')
+            : 'Rejected';
+
         Swal.fire({
             title: `Mark ${name} as ${result}?`,
-            text: `This will update the candidate's recruitment status to ${result === 'Passed' ? 'Passed First Interview' : 'Rejected'}.`,
-            icon: result === 'Passed' ? 'question' : 'warning',
+            text: `Candidate status will move to: ${nextStatus.toUpperCase()}`,
+            icon: result === 'Passed' ? 'success' : 'warning',
             showCancelButton: true,
             confirmButtonColor: result === 'Passed' ? 'var(--fallback-s,oklch(var(--s)))' : 'var(--fallback-er,oklch(var(--er)))',
-            confirmButtonText: `Yes, mark as ${result}`,
+            confirmButtonText: `Confirm ${result}`,
             background: 'var(--fallback-b1,oklch(var(--b1)))',
             color: 'var(--fallback-bc,oklch(var(--bc)))',
         }).then((res) => {
             if (res.isConfirmed) {
-                updateResultMutation.mutate({ interviewId, candidateId, result });
+                updateResultMutation.mutate({ interviewId, candidateId, result, interviewType });
             }
         });
     };
@@ -90,15 +98,36 @@ const InterviewManagement = () => {
                     <h2 className="text-3xl font-black uppercase tracking-tighter italic">Interview <span className="text-primary">Management</span></h2>
                     <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest mt-1">Track and schedule candidate evaluations</p>
                 </div>
-                <button
-                    onClick={() => setShowScheduleModal(true)}
-                    className="btn btn-primary font-black italic shadow-lg hover:scale-105"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    New Schedule
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            // Context-aware phone download from Interview page
+                            const url = "/api/candidates/download-phones?upcomingOnly=true";
+                            axiosSecure.get(url, { responseType: "blob" }).then(res => {
+                                const blob = new Blob([res.data], { type: "text/plain" });
+                                const downloadUrl = window.URL.createObjectURL(blob);
+                                const link = document.createElement("a");
+                                link.href = downloadUrl;
+                                link.download = "upcoming-interview-phones.txt";
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            });
+                        }}
+                        className="btn btn-outline btn-sm font-black italic"
+                    >
+                        Download Upcoming Phones
+                    </button>
+                    <button
+                        onClick={() => setShowScheduleModal(true)}
+                        className="btn btn-primary btn-sm font-black italic shadow-lg hover:scale-105"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        New Schedule
+                    </button>
+                </div>
             </div>
 
             {/* Tabs */}
@@ -115,7 +144,7 @@ const InterviewManagement = () => {
                     onClick={() => setActiveTab("completed")}
                     className={`tab font-black uppercase tracking-widest text-[11px] ${activeTab === "completed" ? "tab-active [--tab-bg:var(--fallback-b1,oklch(var(--b1)))] text-primary" : "opacity-60"}`}
                 >
-                    Completed/Results ({completedInterviews?.length || 0})
+                    Results Management ({completedInterviews?.length || 0})
                 </button>
             </div>
 
@@ -183,6 +212,9 @@ const InterviewManagement = () => {
                                                 }`}>
                                                 {interview.status}
                                             </span>
+                                            {interview.status === 'Passed' && (
+                                                <div className="text-[9px] font-black uppercase opacity-50 mt-1">Qualified for next stage</div>
+                                            )}
                                         </td>
                                         <td className="text-right">
                                             {activeTab === 'upcoming' ? (
@@ -196,13 +228,13 @@ const InterviewManagement = () => {
                                                 interview.status === 'Completed' ? (
                                                     <div className="flex justify-end gap-2">
                                                         <button
-                                                            onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Passed')}
+                                                            onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Passed', interview.type)}
                                                             className="btn btn-success btn-xs font-black uppercase tracking-tighter shadow-sm"
                                                         >
                                                             Pass
                                                         </button>
                                                         <button
-                                                            onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Rejected')}
+                                                            onClick={() => handleMarkResult(interview._id, interview.candidateId, interview.candidate?.name, 'Rejected', interview.type)}
                                                             className="btn btn-error btn-xs font-black uppercase tracking-tighter shadow-sm"
                                                         >
                                                             Reject

@@ -17,12 +17,22 @@ const CandidateUpload = () => {
             return res.data;
         },
         onSuccess: (data) => {
-            Swal.fire({
-                icon: "success",
-                title: "Upload Successful!",
-                text: `Successfully added ${data.added} candidates.`,
-                confirmButtonColor: "var(--fallback-p,oklch(var(--p)))",
-            });
+            if (data.added > 0) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Upload Complete!",
+                    text: `Successfully added ${data.added} candidates. ${data.errors.length > 0 ? "Some rows were skipped." : ""}`,
+                    confirmButtonColor: "var(--fallback-p,oklch(var(--p)))",
+                    footer: data.errors.length > 0 ? `<div style="max-height: 100px; overflow-y: auto; font-size: 10px; color: #666;">${data.errors.join('<br>')}</div>` : null
+                });
+            } else {
+                Swal.fire({
+                    icon: "warning",
+                    title: "No Candidates Added",
+                    text: "Check if the Excel headers match (Name, Email, Phone, Age, Experience).",
+                    footer: `<div style="max-height: 200px; overflow-y: auto; font-size: 10px; color: #d33; text-align: left;">${data.errors.slice(0, 5).join('<br>')}</div>`
+                });
+            }
             setFile(null);
             queryClient.invalidateQueries(["candidates"]);
             document.getElementById("file-input").value = "";

@@ -11,6 +11,11 @@ const CandidateList = () => {
     const [editingCandidate, setEditingCandidate] = useState(null);
     const [filter, setFilter] = useState("all");
 
+    // Selection state
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [rangeInput, setRangeInput] = useState("");
+    const [showBulkModal, setShowBulkModal] = useState(false);
+
     // Fetch candidates
     const { data: candidates, isLoading, error } = useQuery({
         queryKey: ["candidates"],
@@ -54,19 +59,33 @@ const CandidateList = () => {
 
     const handleDownloadPhones = async () => {
         try {
-            const res = await axiosSecure.get("/api/candidates/download-phones", {
+            const isUpcoming = await Swal.fire({
+                title: 'Download Selection',
+                text: "Select which phone numbers you want to download",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Upcoming Only',
+                cancelButtonText: 'All Candidates',
+                reverseButtons: true
+            });
+
+            const url = isUpcoming.isConfirmed
+                ? "/api/candidates/download-phones?upcomingOnly=true"
+                : "/api/candidates/download-phones";
+
+            const res = await axiosSecure.get(url, {
                 responseType: "blob",
             });
 
             const blob = new Blob([res.data], { type: "text/plain" });
-            const url = window.URL.createObjectURL(blob);
+            const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
-            link.href = url;
-            link.download = "candidate-phones.txt";
+            link.href = downloadUrl;
+            link.download = isUpcoming.isConfirmed ? "upcoming-phones.txt" : "all-candidate-phones.txt";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(downloadUrl);
 
             Swal.fire({
                 icon: 'success',
@@ -79,6 +98,33 @@ const CandidateList = () => {
             console.error("Download Error:", error);
             Swal.fire("Error", "Failed to download phone numbers", "error");
         }
+    };
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedIds(filteredCandidates.map(c => c._id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleToggleSelect = (id) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    const handleApplyRange = () => {
+        // Range format: "2-10"
+        const [start, end] = rangeInput.split('-').map(Number);
+        if (isNaN(start) || isNaN(end) || start > end || start < 1) {
+            Swal.fire("Invalid Range", "Please enter a valid range (e.g., 2-10)", "error");
+            return;
+        }
+
+        // Apply range to current filtered list (1-indexed based on table display)
+        const idsInRange = filteredCandidates.slice(start - 1, end).map(c => c._id);
+        setSelectedIds(prev => [...new Set([...prev, ...idsInRange])]);
+        setRangeInput("");
+        Swal.fire("Range Applied", `Selected candidates from ${start} to ${end}`, "success");
     };
 
     if (isLoading) return (
@@ -120,26 +166,56 @@ const CandidateList = () => {
                 </button>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="tabs tabs-boxed bg-base-100 border border-base-300 w-fit">
-                <button
-                    onClick={() => setFilter("all")}
-                    className={`tab font-bold transition-all ${filter === "all" ? "tab-active !bg-primary !text-primary-content" : ""}`}
-                >
-                    All
-                </button>
-                <button
-                    onClick={() => setFilter("hired")}
-                    className={`tab font-bold transition-all ${filter === "hired" ? "tab-active !bg-success !text-success-content" : ""}`}
-                >
-                    Hired
-                </button>
-                <button
-                    onClick={() => setFilter("rejected")}
-                    className={`tab font-bold transition-all ${filter === "rejected" ? "tab-active !bg-error !text-error-content" : ""}`}
-                >
-                    Rejected
-                </button>
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center gap-4 bg-base-100 p-4 rounded-2xl border border-base-300 shadow-sm">
+                <div className="tabs tabs-boxed bg-base-200 w-fit">
+                    <button
+                        onClick={() => { setFilter("all"); setSelectedIds([]); }}
+                        className={`tab font-bold transition-all ${filter === "all" ? "tab-active !bg-primary !text-primary-content" : ""}`}
+                    >
+                        All
+                    </button>
+                    <button
+                        onClick={() => { setFilter("hired"); setSelectedIds([]); }}
+                        className={`tab font-bold transition-all ${filter === "hired" ? "tab-active !bg-success !text-success-content" : ""}`}
+                    >
+                        Hired
+                    </button>
+                    <button
+                        onClick={() => { setFilter("rejected"); setSelectedIds([]); }}
+                        className={`tab font-bold transition-all ${filter === "rejected" ? "tab-active !bg-error !text-error-content" : ""}`}
+                    >
+                        Rejected
+                    </button>
+                    <button
+                        onClick={() => { setFilter("Passed First Interview"); setSelectedIds([]); }}
+                        className={`tab font-bold transition-all ${filter === "Passed First Interview" ? "tab-active !bg-accent !text-accent-content" : ""}`}
+                    >
+                        Passed 1st
+                    </button>
+                </div>
+
+                {!isStaff && (
+                    <div className="flex items-center gap-2 ml-auto">
+                        <div className="join">
+                            <input
+                                type="text"
+                                placeholder="Range (e.g. 2-10)"
+                                className="input input-bordered input-sm join-item w-32 font-bold"
+                                value={rangeInput}
+                                onChange={(e) => setRangeInput(e.target.value)}
+                            />
+                            <button onClick={handleApplyRange} className="btn btn-sm btn-secondary join-item font-black uppercase">Apply</button>
+                        </div>
+                        <button
+                            disabled={selectedIds.length === 0}
+                            onClick={() => setShowBulkModal(true)}
+                            className="btn btn-sm btn-primary font-black uppercase tracking-tighter"
+                        >
+                            Bulk Schedule ({selectedIds.length})
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="overflow-x-auto bg-base-100 rounded-3xl border border-base-300 shadow-xl">
@@ -147,6 +223,16 @@ const CandidateList = () => {
                     {/* head */}
                     <thead className="bg-base-200">
                         <tr className="text-secondary uppercase font-black tracking-widest text-[10px]">
+                            {!isStaff && (
+                                <th className="w-10">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox checkbox-primary checkbox-sm"
+                                        checked={selectedIds.length > 0 && selectedIds.length === filteredCandidates?.length}
+                                        onChange={handleSelectAll}
+                                    />
+                                </th>
+                            )}
                             <th>Candidate</th>
                             <th>Contact Info</th>
                             <th>Details</th>
@@ -166,9 +252,17 @@ const CandidateList = () => {
                                 <tr key={candidate._id} className="hover:bg-primary/5 transition-colors">
                                     <td>
                                         <div className="flex items-center gap-3">
-                                            <div className="avatar placeholder">
-                                                <div className="bg-primary text-primary-content rounded-full w-10 ring ring-primary/20 ring-offset-base-100 ring-offset-2">
-                                                    <span className="font-black">{candidate.name?.charAt(0)}</span>
+                                            <div className="avatar">
+                                                <div className="bg-primary text-primary-content rounded-full w-10 ring ring-primary/20 ring-offset-base-100 ring-offset-2 overflow-hidden">
+                                                    {candidate.photo ? (
+                                                        <img
+                                                            src={candidate.photo.startsWith('http') ? candidate.photo : `${import.meta.env.VITE_API_URL}${candidate.photo}`}
+                                                            alt={candidate.name}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    ) : (
+                                                        <span className="font-black text-xl">{candidate.name?.charAt(0)}</span>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div>
@@ -202,35 +296,51 @@ const CandidateList = () => {
                                     <td>
                                         <span className={`badge badge-sm font-black uppercase tracking-widest ${candidate.status === 'pending' ? 'badge-warning' :
                                             candidate.status === 'Interview Scheduled' ? 'badge-info' :
-                                                candidate.status === 'Hired' ? 'badge-success' :
-                                                    candidate.status === 'Rejected' ? 'badge-error' :
-                                                        'badge-neutral'
+                                                candidate.status === 'Second Interview Scheduled' ? 'badge-secondary' :
+                                                    candidate.status === 'Passed First Interview' ? 'badge-accent' :
+                                                        candidate.status === 'Hired' ? 'badge-success' :
+                                                            candidate.status === 'Rejected' ? 'badge-error' :
+                                                                'badge-neutral'
                                             }`}>
                                             {candidate.status}
                                         </span>
                                     </td>
                                     {!isStaff && (
                                         <td className="text-right">
-                                            <div className="join shadow-sm border border-base-300">
-                                                <button
-                                                    onClick={() => setEditingCandidate(candidate)}
-                                                    className="btn btn-square btn-ghost btn-sm join-item hover:bg-info hover:text-info-content"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(candidate._id, candidate.name)}
-                                                    disabled={deleteMutation.isPending}
-                                                    className="btn btn-square btn-ghost btn-sm join-item hover:bg-error hover:text-error-content"
-                                                >
-                                                    {deleteMutation.isPending ? <span className="loading loading-spinner loading-xs"></span> : (
+                                            <div className="flex justify-end items-center gap-2">
+                                                {candidate.status === 'Passed First Interview' && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedIds([candidate._id]);
+                                                            setShowBulkModal(true);
+                                                        }}
+                                                        className="btn btn-xs btn-outline btn-secondary font-black uppercase tracking-tighter"
+                                                        title="Passed 1st stage. Schedule next."
+                                                    >
+                                                        2nd Interview
+                                                    </button>
+                                                )}
+                                                <div className="join shadow-sm border border-base-300">
+                                                    <button
+                                                        onClick={() => setEditingCandidate(candidate)}
+                                                        className="btn btn-square btn-ghost btn-sm join-item hover:bg-info hover:text-info-content"
+                                                    >
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                                         </svg>
-                                                    )}
-                                                </button>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(candidate._id, candidate.name)}
+                                                        disabled={deleteMutation.isPending}
+                                                        className="btn btn-square btn-ghost btn-sm join-item hover:bg-error hover:text-error-content"
+                                                    >
+                                                        {deleteMutation.isPending ? <span className="loading loading-spinner loading-xs"></span> : (
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </td>
                                     )}
@@ -241,14 +351,13 @@ const CandidateList = () => {
                 </table>
             </div>
 
-            {/* Modern Edit Modal */}
-            {editingCandidate && (
-                <EditModal
-                    candidate={editingCandidate}
-                    onClose={() => setEditingCandidate(null)}
-                    onSuccess={() => {
-                        queryClient.invalidateQueries(["candidates"]);
-                        setEditingCandidate(null);
+            {/* Schedule Multi Modal */}
+            {showBulkModal && (
+                <ScheduleInterviewModal
+                    preSelectedCandidates={selectedIds}
+                    onClose={() => {
+                        setShowBulkModal(false);
+                        setSelectedIds([]);
                     }}
                 />
             )}
@@ -265,6 +374,8 @@ const EditModal = ({ candidate, onClose, onSuccess }) => {
             experience_years: candidate.experience_years,
             age: candidate.age,
             status: candidate.status,
+            previous_experience: candidate.previous_experience || "",
+            photo: candidate.photo || "",
         }
     });
 
@@ -350,9 +461,30 @@ const EditModal = ({ candidate, onClose, onSuccess }) => {
                             >
                                 <option value="pending">Pending</option>
                                 <option value="Interview Scheduled">Interview Scheduled</option>
+                                <option value="Passed First Interview">Passed First Interview</option>
+                                <option value="Second Interview Scheduled">Second Interview Scheduled</option>
                                 <option value="Rejected">Rejected</option>
                                 <option value="Hired">Hired</option>
                             </select>
+                        </div>
+
+                        <div className="form-control">
+                            <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Photo URL</span></label>
+                            <input
+                                type="text"
+                                className="input input-bordered input-sm font-bold"
+                                {...register("photo")}
+                                placeholder="https://example.com/photo.jpg"
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <label className="label py-1"><span className="label-text font-black uppercase text-[10px] opacity-70">Previous Roles (JSON/Text)</span></label>
+                            <textarea
+                                className="textarea textarea-bordered textarea-sm font-bold h-20"
+                                {...register("previous_experience")}
+                                placeholder='e.g. Senior Dev at Google, Team Lead at Meta'
+                            ></textarea>
                         </div>
 
                         <div className="card-actions justify-end mt-8 gap-3">

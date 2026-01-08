@@ -44,7 +44,7 @@ const AdminDashboard = () => {
                     {isAdmin ? "Admin" : "Staff"} <span className="text-primary">Panel</span>
                 </h2>
 
-                {/* daisyUI Tabs */}
+                
                 <div role="tablist" className="tabs tabs-boxed bg-base-100 p-1 shadow-inner border border-base-300">
                     <button
                         role="tab"
@@ -72,7 +72,7 @@ const AdminDashboard = () => {
                 </div>
             </header>
 
-            {/* Quick Stats Grid */}
+            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-base-100 p-4 rounded-3xl shadow-lg border border-base-300 hover:border-primary transition-all group">
                     <p className="text-[10px] font-black opacity-40 uppercase tracking-widest">Global Talent Pool</p>

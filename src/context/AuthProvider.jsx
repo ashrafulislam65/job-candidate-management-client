@@ -43,13 +43,13 @@ const AuthProvider = ({ children }) => {
     enabled: !!user,
     queryFn: async () => {
       const res = await axiosSecure.get("/api/users/me");
-      return res.data; // { role: "...", name: "...", photo: "..." }
+      return res.data; 
     },
   });
 
   const authInfo = {
     user,
-    loading: loading || (!!user && isRoleLoading), // Wait for DB profile if user exists
+    loading: loading || (!!user && isRoleLoading), 
     register,
     login,
     logout,

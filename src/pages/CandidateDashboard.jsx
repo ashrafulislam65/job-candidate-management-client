@@ -10,7 +10,7 @@ const CandidateDashboard = () => {
                 return res.data;
             } catch (err) {
                 if (err.response?.status === 404) {
-                    return null; // Handle missing profile gracefully
+                    return null; 
                 }
                 throw err;
             }

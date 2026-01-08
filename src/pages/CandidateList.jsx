@@ -115,14 +115,14 @@ const CandidateList = () => {
     };
 
     const handleApplyRange = () => {
-        // Range format: "2-10"
+        
         const [start, end] = rangeInput.split('-').map(Number);
         if (isNaN(start) || isNaN(end) || start > end || start < 1) {
             Swal.fire("Invalid Range", "Please enter a valid range (e.g., 2-10)", "error");
             return;
         }
 
-        // Apply range to current filtered list (1-indexed based on table display)
+        
         const idsInRange = filteredCandidates.slice(start - 1, end).map(c => c._id);
         setSelectedIds(prev => [...new Set([...prev, ...idsInRange])]);
         setRangeInput("");

@@ -30,7 +30,7 @@ const ScheduleInterviewModal = ({ onClose, preSelectedCandidates = [] }) => {
             await axiosSecure.post("/api/interviews", interviewData);
         },
         onSuccess: () => {
-            // Success is handled after all mutations finish in onSubmit
+           
         },
         onError: (err) => {
             Swal.fire("Error", err.message || "Failed to schedule", "error");

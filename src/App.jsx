@@ -29,7 +29,7 @@ function App() {
             }
           />
 
-          {/* Catch-all 404 */}
+          
           <Route path="*" element={<ErrorPage />} />
         </Route>
       </Routes>

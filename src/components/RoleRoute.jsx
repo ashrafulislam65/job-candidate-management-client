@@ -4,7 +4,7 @@ import useAuth from "../hooks/useAuth";
 const RoleRoute = ({ children, allowedRoles }) => {
     const { user, role, loading, isRoleLoading } = useAuth();
 
-    // Wait for auth and role to load
+    
     if (loading || isRoleLoading) {
         return <div className="flex items-center justify-center min-h-screen">
             <p>Loading...</p>

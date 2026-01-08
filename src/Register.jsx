@@ -9,14 +9,14 @@ const Register = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const { logout } = useAuth(); // Destructure logout from useAuth
+  const { logout } = useAuth(); 
 
   const onSubmit = async (data) => {
     try {
-      // 1. Register in Firebase
+      
       const result = await firebaseRegister(data.email, data.password);
 
-      // 2. Save to MongoDB with Name and Role
+      
       await axiosSecure.post('/api/users/register-role', {
         uid: result.user.uid,
         email: result.user.email,
@@ -28,7 +28,7 @@ const Register = () => {
         role: 'candidate'
       });
 
-      // 3. Force Logout to prevent auto-login and ensure fresh session on next login
+      
       await logout();
 
       Swal.fire({
@@ -40,7 +40,7 @@ const Register = () => {
         confirmButtonText: "Go to Login"
       });
 
-      // 4. Redirect to Login
+      
       navigate("/login");
     } catch (err) {
       console.error("Registration Error:", err);

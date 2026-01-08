@@ -5,7 +5,7 @@ const ErrorPage = () => {
     return (
         <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
             <div className="card w-full max-w-lg bg-base-100 shadow-2xl border border-base-300 text-center relative overflow-hidden">
-                {/* Decorative Elements */}
+                
                 <div className="absolute top-0 right-0 w-32 h-32 bg-error/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -ml-16 -mb-16"></div>
 

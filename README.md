@@ -99,5 +99,34 @@ This project is optimized for **Firebase Hosting**.
 -   **Data Security**: Strict form validations and protected backend routes.
 -   **Mobile First**: Fully responsive design that works perfectly on phones and tablets.
 
+## 🎯 Design Choices & Assumptions
+
+### Architecture Decisions
+-   **MERN Stack**: Chose React + Node.js for modern, scalable Single Page Application architecture with real-time updates
+-   **Firebase Authentication**: Enterprise-grade auth with built-in security features and token-based API protection
+-   **MongoDB Atlas**: Document-based NoSQL database for flexible schema and horizontal scalability
+-   **Serverless Deployment**: Vercel for backend (auto-scaling, zero-config) and Firebase Hosting for frontend
+
+### Technical Implementation
+-   **File Upload System**: Implemented Excel parsing using `xlsx` and `ExcelJS` libraries with intelligent header detection
+-   **Role-Based Access Control**: Three-tier system (Admin, Staff, Candidate) with middleware-based route protection
+-   **Image Handling**: Magic number detection for file type validation; `/tmp` directory usage in serverless environment
+-   **State Management**: React Query for server state caching and automatic refetching
+-   **Form Validation**: React Hook Form with strict patterns (password strength, email format, phone validation)
+
+### Key Assumptions
+-   Candidates can self-register; Admins can bulk-upload via Excel files
+-   Interview status automatically updates to "Completed" when scheduled date passes
+-   Phone numbers stored as strings to preserve international formatting
+-   Profile photos are optional; system provides default avatars
+-   Excel files may contain varying header formats (intelligent parsing handles synonyms)
+-   In production, uploaded files in `/tmp` are temporary (recommendation: migrate to S3/Firebase Storage for persistence)
+
+### Security Measures
+-   Firebase ID tokens verified on every protected API request
+-   Sensitive files (`.env`, `serviceAccountKey.json`) excluded via `.gitignore`
+-   CORS configured for specific origins only
+-   Password requirements: minimum 8 characters, uppercase, lowercase, number, special character
+
 ---
 *"Rode to my dream"*

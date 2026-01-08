@@ -1,8 +1,5 @@
 # Job Candidate Management System
 
-# Job Candidate Management System
-
-
 <div align="center">
   <img src="public/home-page.png" alt="JobPortal Home Page" width="800" />
   <br />
@@ -11,6 +8,12 @@
     A premium, MERN-stack based platform for managing recruitment workflows with precision and style.
   </p>
 </div>
+
+## 🔗 Links
+
+- **Live Application**: [https://job-candidate-auth.web.app/](https://job-candidate-auth.web.app/)
+- **GitHub Client**: [https://github.com/ashrafulislam65/job-candidate-management-client](https://github.com/ashrafulislam65/job-candidate-management-client)
+- **GitHub Server**: [https://github.com/ashrafulislam65/job-candidate-management-server](https://github.com/ashrafulislam65/job-candidate-management-server)
 
 ## 🚀 Overview
 
@@ -97,4 +100,4 @@ This project is optimized for **Firebase Hosting**.
 -   **Mobile First**: Fully responsive design that works perfectly on phones and tablets.
 
 ---
-*Built with ❤️ by JobPortal Team*
+*"Rode to my dream"*
